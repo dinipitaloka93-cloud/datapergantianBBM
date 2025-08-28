@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATA PERGANTIAN BBM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-exchange-alt text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">DATA PERGANTIAN BBM</h1>
+                        <p class="text-purple-100">Sistem Manajemen Pergantian Jadwal</p>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                            <i class="fas fa-user mr-2"></i>
+                            <span id="totalSiswa">0</span> Siswa Terdaftar
+                        </span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span id="totalPergantian">0</span> Pergantian
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Menu Navigasi</h2>
+                    <div class="space-y-2">
+                        <button onclick="showSection('input')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg transition-all duration-200 active">
+                            <i class="fas fa-plus-circle mr-3"></i>
+                            Input Data Baru
+                        </button>
+                        <button onclick="showSection('arsip')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100">
+                            <i class="fas fa-archive mr-3"></i>
+                            Arsip Data
+                        </button>
+                        <button onclick="showSection('statistik')" class="sidebar-link w-full text-left px-4 py-3 rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100">
+                            <i class="fas fa-chart-bar mr-3"></i>
+                            Statistik
+                        </button>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium text-gray-800 mb-4">Cari Siswa</h3>
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Cari nama siswa..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-medium text-blue-800 mb-2">Info Penting</h4>
+                        <p class="text-blue-600 text-sm">
+                            Data tersimpan otomatis di browser Anda. Untuk backup, ekspor data secara berkala.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <!-- Input Section -->
+                <div id="inputSection" class="fade-in">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Input Data Baru</h2>
+                        
+                        <!-- Tabs -->
+                        <div class="flex border-b border-gray-200 mb-6">
+                            <button id="tabIzin" class="px-4 py-2 font-medium border-b-2 border-purple-600 text-purple-600">
+                                Input Izin
+                            </button>
+                            <button id="tabPergantian" class="px-4 py-2 font-medium text-gray-600 hover:text-purple-600">
+                                Input Pergantian
+                            </button>
+                        </div>
+
+                        <!-- Izin Form -->
+                        <div id="formIzin">
+                            <form id="izinForm" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Siswa</label>
+                                        <input type="text" id="namaSiswa" required
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                               placeholder="Masukkan nama siswa">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pengajar</label>
+                                        <select id="pengajarIzin" required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                            <option value="">Pilih pengajar...</option>
+                                            <option value="Kak Sara">Kak Sara</option>
+                                            <option value="Kak Reihana">Kak Reihana</option>
+                                            <option value="Kak Halimah">Kak Halimah</option>
+                                            <option value="Kak Hilda">Kak Hilda</option>
+                                            <option value="Kak Salsa">Kak Salsa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Izin</label>
+                                    <input type="date" id="tanggalIzin" required
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Izin</label>
+                                    <textarea id="alasanIzin" rows="3" required
+                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                              placeholder="Jelaskan alasan izin..."></textarea>
+                                </div>
+                                
+                                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-medium transition-colors">
+                                    <i class="fas fa-save mr-2"></i>Simpan Data Izin
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Pergantian Form -->
+                        <div id="formPergantian" class="hidden">
+                            <form id="pergantianForm" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Siswa</label>
+                                        <select id="siswaSelect" required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                            <option value="">Pilih siswa...</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pengajar Pengganti</label>
+                                        <select id="pengajarPergantian" required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                            <option value="">Pilih pengajar pengganti...</option>
+                                            <option value="Kak Sara">Kak Sara</option>
+                                            <option value="Kak Reihana">Kak Reihana</option>
+                                            <option value="Kak Halimah">Kak Halimah</option>
+                                            <option value="Kak Hilda">Kak Hilda</option>
+                                            <option value="Kak Salsa">Kak Salsa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pergantian</label>
+                                        <input type="date" id="tanggalPergantian" required
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Jam</label>
+                                        <input type="time" id="jamPergantian" required
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors">
+                                    <i class="fas fa-exchange-alt mr-2"></i>Simpan Pergantian
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
+                        <div id="recentActivity" class="space-y-3">
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                <p>Belum ada aktivitas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arsip Section -->
+                <div id="arsipSection" class="hidden fade-in">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Arsip Data Siswa</h2>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Berdasarkan Pengajar</label>
+                            <select id="filterPengajar" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">Semua Pengajar</option>
+                                <option value="Kak Sara">Kak Sara</option>
+                                <option value="Kak Reihana">Kak Reihana</option>
+                                <option value="Kak Halimah">Kak Halimah</option>
+                                <option value="Kak Hilda">Kak Hilda</option>
+                                <option value="Kak Salsa">Kak Salsa</option>
+                            </select>
+                        </div>
+                        <div id="arsipContainer">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistik Section -->
+                <div id="statistikSection" class="hidden fade-in">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Statistik Data</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-blue-50 p-6 rounded-lg text-center">
+                                <div class="text-3xl font-bold text-blue-600" id="statTotalSiswa">0</div>
+                                <div class="text-blue-800 mt-2">Total Siswa</div>
+                            </div>
+                            <div class="bg-green-50 p-6 rounded-lg text-center">
+                                <div class="text-3xl font-bold text-green-600" id="statTotalIzin">0</div>
+                                <div class="text-green-800 mt-2">Total Izin</div>
+                            </div>
+                            <div class="bg-purple-50 p-6 rounded-lg text-center">
+                                <div class="text-3xl font-bold text-purple-600" id="statTotalPergantian">0</div>
+                                <div class="text-purple-800 mt-2">Total Pergantian</div>
+                            </div>
+                        </div>
+                        <div id="chartContainer" class="h-64">
+                            <!-- Chart will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let studentsData = JSON.parse(localStorage.getItem('bbmStudents')) || {};
+        let activities = JSON.parse(localStorage.getItem('bbmActivities')) || [];
+
+        // DOM Elements
+        const tabIzin = document.getElementById('tabIzin');
+        const tabPergantian = document.getElementById('tabPergantian');
+        const formIzin = document.getElementById('formIzin');
+        const formPergantian = document.getElementById('formPergantian');
+        const siswaSelect = document.getElementById('siswaSelect');
+        const searchInput = document.getElementById('searchInput');
+        const arsipContainer = document.getElementById('arsipContainer');
+        const filterPengajar = document.getElementById('filterPengajar');
+
+        // Initialize
+        function init() {
+            updateCounters();
+            populateStudentSelect();
+            loadRecentActivities();
+            updateStatistics();
+            loadArsipData();
+            
+            // Event Listeners
+            tabIzin.addEventListener('click', () => switchTab('izin'));
+            tabPergantian.addEventListener('click', () => switchTab('pergantian'));
+            
+            document.getElementById('izinForm').addEventListener('submit', handleIzinSubmit);
+            document.getElementById('pergantianForm').addEventListener('submit', handlePergantianSubmit);
+            filterPengajar.addEventListener('change', loadArsipData);
+            searchInput.addEventListener('input', filterStudents);
+        }
+
+        // Switch between tabs
+        function switchTab(tab) {
+            if (tab === 'izin') {
+                tabIzin.classList.add('border-purple-600', 'text-purple-600');
+                tabPergantian.classList.remove('border-purple-600', 'text-purple-600');
+                tabPergantian.classList.add('text-gray-600');
+                formIzin.classList.remove('hidden');
+                formPergantian.classList.add('hidden');
+            } else {
+                tabPergantian.classList.add('border-purple-600', 'text-purple-600');
+                tabIzin.classList.remove('border-purple-600', 'text-purple-600');
+                tabIzin.classList.add('text-gray-600');
+                formPergantian.classList.remove('hidden');
+                formIzin.classList.add('hidden');
+            }
+        }
+
+        // Handle Izin Submission
+        function handleIzinSubmit(e) {
+            e.preventDefault();
+            
+            const namaSiswa = document.getElementById('namaSiswa').value.trim();
+            const pengajar = document.getElementById('pengajarIzin').value.trim();
+            const tanggal = document.getElementById('tanggalIzin').value;
+            const alasan = document.getElementById('alasanIzin').value.trim();
+            
+            if (!studentsData[namaSiswa]) {
+                studentsData[namaSiswa] = {
+                    izin: [],
+                    pergantian: []
+                };
+            }
+            
+            const izinData = {
+                id: Date.now(),
+                tanggal,
+                pengajar,
+                alasan,
+                createdAt:
